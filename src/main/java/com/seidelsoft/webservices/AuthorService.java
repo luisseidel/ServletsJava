@@ -3,7 +3,6 @@ package com.seidelsoft.webservices;
 import com.seidelsoft.model.Author;
 import com.seidelsoft.model.PhoneNumber;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,4 +41,22 @@ public class AuthorService {
         return Arrays.asList(a, a2, a3, a4);
     }
 
+    public Author getById(Long id) {
+        Author authorReturn = null;
+        for (Author a : getAutores()) {
+            if (a.getId().equals(id)) {
+                authorReturn = a;
+            }
+        }
+        return authorReturn;
+    }
+
+    public Object save(Object obj) {
+
+        return new Object();
+    }
+
+    public void delete(Long id) {
+
+    }
 }

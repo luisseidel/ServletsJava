@@ -1,8 +1,9 @@
 package com.seidelsoft.util;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.servlet.ServletException;
 
 public class RegexUtil {
 
@@ -14,9 +15,9 @@ public class RegexUtil {
         return Pattern.compile("/"+pattern);
     }
 
-    public static Long matchId(String requestUri, String pattern) throws ServletException {
+    public static Long matchId(HttpServletRequest req, String pattern) throws ServletException {
         // Verifica o ID
-        Matcher matcher = getRegexById(pattern).matcher(requestUri);
+        Matcher matcher = getRegexById(pattern).matcher(req.getRequestURI());
         if (matcher.find() && matcher.groupCount() > 0) {
             String s = matcher.group(1);
             if (s != null && s.trim().length() > 0) {

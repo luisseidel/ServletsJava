@@ -1,7 +1,5 @@
 package com.seidelsoft.util;
 
-import jakarta.xml.bind.JAXBException;
-
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
