@@ -1,10 +1,7 @@
 package com.seidelsoft.servlet;
 
-import com.google.gson.JsonObject;
 import com.seidelsoft.model.Author;
 import com.seidelsoft.model.AuthorList;
-import com.seidelsoft.model.PhoneNumber;
-import com.seidelsoft.util.JsonUtil;
 import com.seidelsoft.util.RegexUtil;
 import com.seidelsoft.util.ServletUtil;
 import com.seidelsoft.util.XmlUtil;

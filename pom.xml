@@ -12,6 +12,42 @@
     <version>1.0-SNAPSHOT</version>
     <name>ServletsJava Maven Webapp</name>
     <url>http://maven.apache.org</url>
+
+    <build>
+        <finalName>ServletsJava</finalName>
+        <directory>${project.basedir}/target</directory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.2</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.4.1</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.basedir}/target</directory>
+                            <includes>
+                                <include>*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -37,7 +73,4 @@
         </dependency>
 
     </dependencies>
-    <build>
-        <finalName>ServletsJava</finalName>
-    </build>
 </project>
