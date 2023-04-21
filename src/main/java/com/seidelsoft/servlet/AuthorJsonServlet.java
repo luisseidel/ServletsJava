@@ -1,8 +1,6 @@
 package com.seidelsoft.servlet;
 
-import com.google.gson.JsonObject;
 import com.seidelsoft.model.Author;
-import com.seidelsoft.model.PhoneNumber;
 import com.seidelsoft.util.JsonUtil;
 import com.seidelsoft.util.RegexUtil;
 import com.seidelsoft.util.ServletUtil;
@@ -31,7 +29,7 @@ public class AuthorJsonServlet extends HttpServlet {
         if (id != null) {
             json = JsonUtil.toJson(service.getById(id));
         } else {
-            List<Author> list = service.getAutores();
+            List<Author> list = service.getList();
             json = JsonUtil.toJson(list);
         }
 
@@ -61,36 +59,11 @@ public class AuthorJsonServlet extends HttpServlet {
         Long id = RegexUtil.matchId(request, "authors/json");
         String body = getBody(request);
 
-        return createAuthor(id, body);
+        return service.createAuthor(id, body);
     }
 
     private String getBody(HttpServletRequest request) throws IOException {
         return request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
     }
 
-    private Author createAuthor(Long id, String body) {
-        Author author = null;
-        if (id != null) {
-            author = service.getById(id);
-        }
-        if (author == null && id != null) {
-            author = new Author(id);
-        }
-
-        if (author != null && body != null) {
-            JsonObject jsonObject = JsonUtil.toJsonObject(body, JsonObject.class);
-            String nome = jsonObject.get("nome").toString();
-            String editora = jsonObject.get("editora").toString();
-            String phoneJson = JsonUtil.toJson(jsonObject.get("phoneNumber").getAsJsonObject());
-            PhoneNumber phoneNumber = (PhoneNumber) JsonUtil.fromJson(phoneJson, PhoneNumber.class);
-            phoneJson = JsonUtil.toJson(jsonObject.get("otherPhoneNumber").getAsJsonObject());
-            PhoneNumber otherPhoneNumber = (PhoneNumber) JsonUtil.fromJson(phoneJson, PhoneNumber.class);
-
-            author.setNome(nome);
-            author.setEditora(editora);
-            author.setPhoneNumber(phoneNumber);
-            author.setOtherPhoneNumber(otherPhoneNumber);
-        }
-            return author;
-    }
 }

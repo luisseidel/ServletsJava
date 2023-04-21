@@ -1,65 +1,100 @@
 package com.seidelsoft.dao;
 
 import com.seidelsoft.model.Author;
-import com.seidelsoft.model.PhoneNumber;
 
-import java.util.Arrays;
-import java.util.List;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 public class AuthorsDAO extends BaseDAO<Author> {
 
-    @Override
-    public List<Author> getAll() {
-        Author a = new Author();
-        a.setId(1L);
-        a.setNome("Luis Seidel");
-        a.setEditora("Teste");
-        a.setPhoneNumber(new PhoneNumber(1L, "(55) 9 8800-1122"));
-        a.setOtherPhoneNumber(new PhoneNumber(2L, "(55) 0202-3311"));
-
-        Author a2 = new Author();
-        a2.setId(2L);
-        a2.setNome("2222");
-        a2.setEditora("2222");
-        a2.setPhoneNumber(new PhoneNumber(1L, "(55) 9 8800-1122"));
-        a2.setOtherPhoneNumber(new PhoneNumber(2L, "(55) 0202-3311"));
-
-        Author a3 = new Author();
-        a3.setId(3L);
-        a3.setNome("3333");
-        a3.setEditora("3333");
-        a3.setPhoneNumber(new PhoneNumber(1L, "(55) 9 8800-1122"));
-        a3.setOtherPhoneNumber(new PhoneNumber(2L, "(55) 0202-3311"));
-
-        Author a4 = new Author();
-        a4.setId(4L);
-        a4.setNome("44444");
-        a4.setEditora("4444");
-        a4.setPhoneNumber(new PhoneNumber(1L, "(55) 9 8800-1122"));
-        a4.setOtherPhoneNumber(new PhoneNumber(2L, "(55) 0202-3311"));
-
-        return Arrays.asList(a, a2, a3, a4);
+    public AuthorsDAO(String tableName) {
+        super(tableName);
     }
 
     @Override
     public Author getById(Long id) {
-        Author authorReturn = null;
-        for (Author a : getAll()) {
-            if (a.getId().equals(id)) {
-                authorReturn = a;
-            }
+        try {
+            PreparedStatement stmt = getConnection().prepareStatement(selectById(id));
+            ResultSet result = executeQuery(stmt);
+
+            return createAuthor(result);
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
-        return authorReturn;
+
+        return null;
     }
 
     @Override
-    public Author save(Author obj) {
-        return new Author();
+    public List<Author> getList() {
+        try {
+            PreparedStatement stmt = getConnection().prepareStatement(getListQuery());
+            ResultSet result = executeQuery(stmt);
+
+            return prepareListOf(result);
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public Author save(Author a) {
+        try {
+            Map<String, String> colVals = new HashMap<>();
+            colVals.put("nome", a.getNome());
+            colVals.put("editora", a.getEditora());
+            PreparedStatement stmt = getConnection().prepareStatement(insertQuery(colVals));
+            ResultSet result = executeQuery(stmt);
+
+            return createAuthor(result);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     @Override
     public void delete(Long id) {
-
+        try {
+            PreparedStatement stmt = getConnection().prepareStatement(deleteById(id));
+            executeQuery(stmt);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
+    @Override
+    protected List<Author> prepareListOf(ResultSet result) throws SQLException {
+        List<Author> list = new ArrayList<>();
+
+        while (result.next()) {
+            Long id = result.getLong("id");
+            String nome = result.getString("nome");
+            String editora = result.getString("editora");
+
+            list.add(new Author(id, nome, editora));
+        }
+
+        return list;
+    }
+
+    private Author createAuthor(ResultSet result) throws SQLException {
+        while (result.next()) {
+            Long id = result.getLong("id");
+            String nome = result.getString("nome");
+            String editora = result.getString("editora");
+
+            return new Author(id, nome, editora);
+        }
+
+        return null;
+    }
 }

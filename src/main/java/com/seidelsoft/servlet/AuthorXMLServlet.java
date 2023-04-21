@@ -39,7 +39,7 @@ public class AuthorXMLServlet extends HttpServlet {
                 xml = XmlUtil.toXml(service.getById(id));
             } else {
                 AuthorList authorList = new AuthorList();
-                authorList.setAuthors(service.getAutores());
+                authorList.setAuthors(service.getList());
                 xml = XmlUtil.toXml(authorList);
             }
 
@@ -90,8 +90,6 @@ public class AuthorXMLServlet extends HttpServlet {
 
             author.setNome(rootXml.getAttributeNode("nome").getValue());
             author.setEditora(rootXml.getAttributeNode("editora").getValue());
-//            author.setPhoneNumber(phoneNumber);
-//            author.setOtherPhoneNumber(otherPhoneNumber);
         }
         return author;
     }
