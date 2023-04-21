@@ -8,8 +8,8 @@ public class DbConnection {
     private static final String host = "localhost";
     private static final String port = "5432";
     private static final String database = "testeServlet";
-    private static final String user = "celk";
-    private static final String password = "celk";
+    private static final String user = "teste";
+    private static final String password = "teste";
 
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(getURL(), getUser(), getPassword());
