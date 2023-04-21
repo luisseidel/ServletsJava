@@ -1,6 +1,8 @@
 package com.seidelsoft.util;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class DbConnection {
 
@@ -8,8 +10,8 @@ public class DbConnection {
     private static final String host = "localhost";
     private static final String port = "5432";
     private static final String database = "testeServlet";
-    private static final String user = "teste";
-    private static final String password = "teste";
+    private static final String user = "celk";
+    private static final String password = "celk";
 
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(getURL(), getUser(), getPassword());

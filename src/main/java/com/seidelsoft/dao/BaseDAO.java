@@ -1,13 +1,11 @@
 package com.seidelsoft.dao;
 
-import com.seidelsoft.model.Author;
 import com.seidelsoft.util.DbConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +22,8 @@ public abstract class BaseDAO<T> {
     public abstract T getById(Long id);
     protected abstract List<T> getList();
     protected abstract List<T> prepareListOf(ResultSet result) throws SQLException;
-    public abstract T save(T obj);
-    public abstract void delete(Long id);
+    public abstract T save(T obj) throws SQLException;
+    public abstract void delete(Long id) throws SQLException;
 
     public Connection getConnection() {
         try {
@@ -40,10 +38,25 @@ public abstract class BaseDAO<T> {
         return this.connection;
     }
 
-    public ResultSet executeQuery(PreparedStatement stmt) throws SQLException {
+    public ResultSet executeQueryForGet(PreparedStatement stmt) throws SQLException {
         ResultSet result = stmt.executeQuery();
         getConnection().close();
         return result;
+    }
+
+    public ResultSet verifyBeforeInsert(Map<String, String> columnsValues) throws SQLException {
+        PreparedStatement stmt = getConnection().prepareStatement(existsQuery(columnsValues));
+        return stmt.executeQuery();
+    }
+
+    public void executeInsert(Map<String, String> columnsValues) throws SQLException {
+        PreparedStatement stmt = getConnection().prepareStatement(insertQuery(columnsValues));
+        stmt.executeUpdate();
+    }
+
+    public void executeDelete(Long id) throws SQLException {
+        PreparedStatement stmt = getConnection().prepareStatement(deleteById(id));
+        stmt.executeUpdate();
     }
 
     public String selectById(Long id) {
@@ -58,6 +71,28 @@ public abstract class BaseDAO<T> {
         return "delete from " + getTableName() + " where id = " + id;
     }
 
+    public String existsQuery(Map<String, String> columnsValues) {
+        StringBuilder compares = new StringBuilder();
+        String select = "select id from " + getTableName() + " where {compare}";
+        boolean firstWhere = true;
+
+        for (Map.Entry<String, String> entry : columnsValues.entrySet()) {
+            String column = entry.getKey();
+            String value = entry.getValue();
+
+            if (firstWhere) {
+                compares.append(column + " = '" + value + "'");
+            } else {
+                compares.append(" and " + column + " = '" + value + "'");
+            }
+            firstWhere = false;
+        }
+
+        select = select.replace("{compare}", compares);
+
+        return select;
+    }
+
     public String insertQuery(Map<String, String> columnsValues) {
         StringBuilder columns = new StringBuilder();
         StringBuilder values = new StringBuilder();
@@ -69,14 +104,20 @@ public abstract class BaseDAO<T> {
             String value = entry.getValue();
 
             columns.append(", " + column);
-            values.append(", " + value);
+            values.append(", '" + value + "'");
         }
+        insert = insert.replace(", {cols}", columns);
+        insert = insert.replace("{values}", values);
 
-        return insert.replace(", {cols}", columns).replace("{values}", values);
+        return insert;
+    }
+
+    public String getMaxId() {
+        return "select max(id) as id from " + getTableName();
     }
 
     public String getNewIdSubQuery() {
-        return "(select max(id) from " + getTableName() + ")";
+        return "(select max(id) + 1 from " + getTableName() + ")";
     }
 
     public String getTableName() {

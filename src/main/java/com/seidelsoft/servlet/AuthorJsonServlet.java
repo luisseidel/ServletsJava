@@ -38,20 +38,28 @@ public class AuthorJsonServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Author author = getFromRequest(req);
-        service.save(author);
-        ServletUtil.writeJSON(resp, JsonUtil.toJson(author));
+        try {
+            Author author = getFromRequest(req);
+            Author authorDb = service.save(author);
+            ServletUtil.writeJSON(resp, JsonUtil.toJson(authorDb));
+        } catch (Exception e) {
+            resp.sendError(400, e.getMessage());
+        }
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Long id = RegexUtil.matchId(req, "authors/json");
-        if (id != null) {
-            service.delete(id);
-            String json = JsonUtil.toJson(Response.Ok("Registro excluído com sucesso!"));
-            ServletUtil.writeJSON(resp, json);
-        } else {
-            resp.sendError(404, "URL Inválida!");
+        try {
+            Long id = RegexUtil.matchId(req, "authors/json");
+            if (id != null) {
+                service.delete(id);
+                String json = JsonUtil.toJson(Response.Ok("Registro excluído com sucesso!"));
+                ServletUtil.writeJSON(resp, json);
+            } else {
+                resp.sendError(404, "Forneça o id para deleção do registro!");
+            }
+        } catch (Exception e) {
+            resp.sendError(404, e.getMessage());
         }
     }
 

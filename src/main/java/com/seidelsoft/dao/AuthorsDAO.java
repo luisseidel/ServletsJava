@@ -5,7 +5,10 @@ import com.seidelsoft.model.Author;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AuthorsDAO extends BaseDAO<Author> {
 
@@ -17,7 +20,7 @@ public class AuthorsDAO extends BaseDAO<Author> {
     public Author getById(Long id) {
         try {
             PreparedStatement stmt = getConnection().prepareStatement(selectById(id));
-            ResultSet result = executeQuery(stmt);
+            ResultSet result = executeQueryForGet(stmt);
 
             return createAuthor(result);
 
@@ -32,7 +35,7 @@ public class AuthorsDAO extends BaseDAO<Author> {
     public List<Author> getList() {
         try {
             PreparedStatement stmt = getConnection().prepareStatement(getListQuery());
-            ResultSet result = executeQuery(stmt);
+            ResultSet result = executeQueryForGet(stmt);
 
             return prepareListOf(result);
 
@@ -44,30 +47,40 @@ public class AuthorsDAO extends BaseDAO<Author> {
     }
 
     @Override
-    public Author save(Author a) {
+    public Author save(Author a) throws SQLException {
         try {
             Map<String, String> colVals = new HashMap<>();
             colVals.put("nome", a.getNome());
             colVals.put("editora", a.getEditora());
-            PreparedStatement stmt = getConnection().prepareStatement(insertQuery(colVals));
-            ResultSet result = executeQuery(stmt);
 
-            return createAuthor(result);
+            ResultSet exists = verifyBeforeInsert(colVals);
+            if (exists != null && exists.next()) {
+                throw new SQLException("Usuário já existe no banco de dados!");
+            }
 
+            if (exists != null && !exists.next()) {
+                executeInsert(colVals);
+                ResultSet result = executeQueryForGet(getConnection().prepareStatement(getMaxId()));
+                while (result.next()) {
+                    Long id = result.getLong("id");
+                    return getById(id);
+                }
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLException(e.getMessage());
         }
 
         return null;
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id) throws SQLException {
         try {
-            PreparedStatement stmt = getConnection().prepareStatement(deleteById(id));
-            executeQuery(stmt);
+            if (getById(id) == null)
+                throw new SQLException("Usuário não existe na base de dados!");
+            executeDelete(id);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLException(e);
         }
     }
 
